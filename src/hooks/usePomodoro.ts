@@ -73,7 +73,6 @@ export function usePomodoro(initialConfig: PomodoroConfig = DEFAULT_CONFIG) {
     if (secondsLeft !== 0 || !isRunning) return;
 
     clearTimer();
-    setIsRunning(false);
 
     if (mode === 'focus') {
       setCompletedFocusSessions((n) => n + 1);
@@ -83,10 +82,19 @@ export function usePomodoro(initialConfig: PomodoroConfig = DEFAULT_CONFIG) {
       setMode('focus');
       setSecondsLeft(durationForMode('focus'));
     }
+    // Enchaîne automatiquement la phase suivante
+    setIsRunning(true);
   }, [secondsLeft, isRunning, mode, clearTimer, durationForMode]);
 
   const start = useCallback(() => setIsRunning(true), []);
   const pause = useCallback(() => setIsRunning(false), []);
+
+  const beginSession = useCallback(() => {
+    clearTimer();
+    setMode('focus');
+    setSecondsLeft(config.focusMinutes * 60);
+    setIsRunning(true);
+  }, [clearTimer, config.focusMinutes]);
 
   const reset = useCallback(() => {
     resetToMode(mode, false);
@@ -129,6 +137,7 @@ export function usePomodoro(initialConfig: PomodoroConfig = DEFAULT_CONFIG) {
     progress,
     start,
     pause,
+    beginSession,
     reset,
     switchMode,
     updateConfig,

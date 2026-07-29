@@ -1,5 +1,4 @@
 import { Pause, Play, RotateCcw } from 'lucide-react';
-import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import {
   formatTime,
@@ -12,7 +11,6 @@ interface PomodoroTimerProps {
   mode: TimerMode;
   secondsLeft: number;
   isRunning: boolean;
-  progress: number;
   completedFocusSessions: number;
   onStart: () => void;
   onPause: () => void;
@@ -26,7 +24,6 @@ export function PomodoroTimer({
   mode,
   secondsLeft,
   isRunning,
-  progress,
   completedFocusSessions,
   onStart,
   onPause,
@@ -34,25 +31,24 @@ export function PomodoroTimer({
   onSwitchMode,
   onUpdateConfig,
 }: PomodoroTimerProps) {
-  const size = 260;
-  const stroke = 10;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - progress);
+  const totalSeconds =
+    (mode === 'focus' ? config.focusMinutes : config.breakMinutes) * 60;
+  const canResume = !isRunning && secondsLeft > 0 && secondsLeft < totalSeconds;
+  const canStart = !isRunning && (secondsLeft === totalSeconds || secondsLeft === 0);
 
   return (
-    <section className="glass-card w-full max-w-lg rounded-3xl p-8 sm:p-10">
-      <div className="mb-8 flex justify-center gap-2">
+    <section className="flex w-full flex-col items-center">
+      <div className="mb-6 flex gap-2 sm:mb-8">
         {(['focus', 'break'] as const).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => onSwitchMode(m)}
             className={cn(
-              'rounded-2xl px-5 py-2 text-sm font-semibold tracking-wide transition-all duration-300',
+              'rounded-full px-4 py-1.5 text-xs font-medium tracking-wide transition-all duration-300',
               mode === m
-                ? 'bg-rose-400/90 text-white shadow-soft scale-[1.02]'
-                : 'bg-white/40 text-rose-700/70 hover:bg-white/60',
+                ? 'bg-white/35 text-white shadow-sm'
+                : 'bg-white/10 text-white/65 hover:bg-white/20',
             )}
           >
             {m === 'focus' ? 'Étude' : 'Pause'}
@@ -60,92 +56,91 @@ export function PomodoroTimer({
         ))}
       </div>
 
-      <div className="relative mx-auto mb-8 flex h-[260px] w-[260px] items-center justify-center">
-        <svg
-          width={size}
-          height={size}
-          className="absolute inset-0 -rotate-90"
-          aria-hidden
-        >
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.35)"
-            strokeWidth={stroke}
-          />
-          <motion.circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="url(#timerGradient)"
-            strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-          />
-          <defs>
-            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#f9a8d4" />
-              <stop offset="100%" stopColor="#e879a9" />
-            </linearGradient>
-          </defs>
-        </svg>
+      {/* Contrôles à gauche + heure géante au centre */}
+      <div className="relative flex w-full max-w-4xl items-center justify-center gap-4 sm:gap-8">
+        <div className="absolute left-0 top-1/2 z-10 flex -translate-y-1/2 flex-col gap-2 sm:static sm:translate-y-0 sm:shrink-0">
+          <button
+            type="button"
+            onClick={onStart}
+            disabled={!canStart || isRunning}
+            className={cn(
+              'control-btn flex min-w-[7.5rem] items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition active:scale-95 sm:min-w-[8.5rem]',
+              canStart && !isRunning
+                ? 'bg-white text-[#2a1040] shadow-lg hover:bg-white/90'
+                : 'bg-white/15 text-white/45 cursor-not-allowed',
+            )}
+          >
+            <Play className="h-4 w-4 fill-current" />
+            Démarrer
+          </button>
 
-        <div className="relative z-10 text-center">
-          <p className="mb-1 font-display text-sm font-medium tracking-widest text-rose-400/80 uppercase">
-            {mode === 'focus' ? 'Concentration' : 'Repospiration'}
-          </p>
+          <button
+            type="button"
+            onClick={onPause}
+            disabled={!isRunning}
+            className={cn(
+              'control-btn flex min-w-[7.5rem] items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition active:scale-95 sm:min-w-[8.5rem]',
+              isRunning
+                ? 'bg-white/90 text-[#2a1040] shadow-lg hover:bg-white'
+                : 'bg-white/15 text-white/45 cursor-not-allowed',
+            )}
+          >
+            <Pause className="h-4 w-4 fill-current" />
+            Pause
+          </button>
+
+          <button
+            type="button"
+            onClick={onStart}
+            disabled={!canResume}
+            className={cn(
+              'control-btn flex min-w-[7.5rem] items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition active:scale-95 sm:min-w-[8.5rem]',
+              canResume
+                ? 'bg-white text-[#2a1040] shadow-lg hover:bg-white/90'
+                : 'bg-white/15 text-white/45 cursor-not-allowed',
+            )}
+          >
+            <Play className="h-4 w-4 fill-current" />
+            Reprendre
+          </button>
+
+          <button
+            type="button"
+            onClick={onReset}
+            className="control-btn flex min-w-[7.5rem] items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white/90 transition hover:bg-white/25 active:scale-95 sm:min-w-[8.5rem]"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </button>
+        </div>
+
+        <div className="flex flex-1 flex-col items-center pl-20 sm:pl-0">
           <p
-            className="font-display text-6xl font-semibold tracking-tight text-rose-900/90 tabular-nums sm:text-7xl"
+            className="timer-digits text-[6.5rem] leading-none text-white sm:text-[9rem] md:text-[11rem] lg:text-[12.5rem]"
             aria-live="polite"
           >
             {formatTime(secondsLeft)}
           </p>
-          <p className="mt-2 text-xs text-rose-500/70">
-            {completedFocusSessions} session
-            {completedFocusSessions !== 1 ? 's' : ''} terminée
-            {completedFocusSessions !== 1 ? 's' : ''}
+
+          <p className="mt-4 text-sm tracking-wide text-white/65 sm:mt-5 sm:text-base">
+            {mode === 'focus' ? 'Concentration' : 'Repospiration'}
+            {completedFocusSessions > 0 && (
+              <span className="text-white/40">
+                {' '}
+                · {completedFocusSessions} session
+                {completedFocusSessions !== 1 ? 's' : ''}
+              </span>
+            )}
           </p>
         </div>
+
+        <div className="hidden w-[8.5rem] shrink-0 sm:block" aria-hidden />
       </div>
 
-      <div className="mb-8 flex items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={onReset}
-          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/50 text-rose-600 shadow-soft transition hover:bg-white/80 hover:scale-105 active:scale-95"
-          aria-label="Réinitialiser"
-        >
-          <RotateCcw className="h-5 w-5" />
-        </button>
-
-        <button
-          type="button"
-          onClick={isRunning ? onPause : onStart}
-          className="flex h-14 min-w-[9.5rem] items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-500 px-6 text-base font-semibold text-white shadow-glow transition hover:brightness-105 hover:scale-[1.03] active:scale-95"
-        >
-          {isRunning ? (
-            <>
-              <Pause className="h-5 w-5 fill-current" />
-              Pause
-            </>
-          ) : (
-            <>
-              <Play className="h-5 w-5 fill-current" />
-              Démarrer
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium tracking-wide text-rose-600/70 uppercase">
-            Étude (min)
+      <div className="mt-8 grid w-full max-w-[15rem] grid-cols-2 gap-3">
+        <label className="block text-center">
+          <span className="mb-1 block text-[0.65rem] font-medium tracking-wider text-white/50 uppercase">
+            Étude
           </span>
           <input
             type="number"
@@ -156,12 +151,12 @@ export function PomodoroTimer({
             onChange={(e) =>
               onUpdateConfig({ focusMinutes: Number(e.target.value) || 1 })
             }
-            className="w-full rounded-2xl border border-white/50 bg-white/45 px-4 py-2.5 text-center text-rose-900 outline-none transition focus:border-rose-300 focus:bg-white/70 disabled:opacity-50"
+            className="w-full rounded-2xl border border-white/20 bg-white/12 px-3 py-2 text-center text-white outline-none transition focus:border-white/45 focus:bg-white/20 disabled:opacity-50"
           />
         </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium tracking-wide text-rose-600/70 uppercase">
-            Pause (min)
+        <label className="block text-center">
+          <span className="mb-1 block text-[0.65rem] font-medium tracking-wider text-white/50 uppercase">
+            Pause
           </span>
           <input
             type="number"
@@ -172,7 +167,7 @@ export function PomodoroTimer({
             onChange={(e) =>
               onUpdateConfig({ breakMinutes: Number(e.target.value) || 1 })
             }
-            className="w-full rounded-2xl border border-white/50 bg-white/45 px-4 py-2.5 text-center text-rose-900 outline-none transition focus:border-rose-300 focus:bg-white/70 disabled:opacity-50"
+            className="w-full rounded-2xl border border-white/20 bg-white/12 px-3 py-2 text-center text-white outline-none transition focus:border-white/45 focus:bg-white/20 disabled:opacity-50"
           />
         </label>
       </div>

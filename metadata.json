@@ -1,5 +1,5 @@
-﻿{
-  "name": "Nuage Pomodoro",
+{
+  "name": "Pomodoro",
   "description": "Timer Pomodoro élégant pour rester concentré.",
   "requestFramePermissions": [],
   "majorCapabilities": []

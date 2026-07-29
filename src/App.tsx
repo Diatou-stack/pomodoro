@@ -1,94 +1,194 @@
-﻿import { motion } from 'motion/react';
-import { CloudDecor } from './components/CloudDecor';
+﻿import { useCallback, useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { ListTodo, Settings, Volume2 } from 'lucide-react';
+import { CornerPanel } from './components/CornerPanel';
+import { CountdownScreen } from './components/CountdownScreen';
+import { NameModal } from './components/NameModal';
 import { NatureSounds } from './components/NatureSounds';
-import { PomodoroTimer } from './components/PomodoroTimer';
+import { OutlineClock } from './components/OutlineClock';
 import { QuoteCard } from './components/QuoteCard';
+import { SetupScreen } from './components/SetupScreen';
+import { TodoList } from './components/TodoList';
+import { useNatureAudio } from './hooks/useNatureAudio';
 import { usePomodoro } from './hooks/usePomodoro';
+import { usePreCountdown } from './hooks/usePreCountdown';
 import { useQuoteRotation } from './hooks/useQuoteRotation';
+import { useTodos } from './hooks/useTodos';
+import { useUserName } from './hooks/useUserName';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.08 * i, duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
-  }),
-};
+type Phase = 'setup' | 'countdown' | 'session';
+type PanelId = 'todo' | 'sounds' | null;
 
 export default function App() {
+  const [phase, setPhase] = useState<Phase>('setup');
+  const [openPanel, setOpenPanel] = useState<PanelId>(null);
   const pomodoro = usePomodoro({ focusMinutes: 25, breakMinutes: 5 });
   const { quote, quoteKey, goNext } = useQuoteRotation(10_000);
+  const todos = useTodos();
+  const { name, askName, saveName } = useUserName();
+  const { activeIds, volume, setVolume, toggleSound, error } = useNatureAudio();
+
+  const handleCountdownDone = useCallback(() => {
+    pomodoro.beginSession();
+    setPhase('session');
+  }, [pomodoro.beginSession]);
+
+  const countdownValue = usePreCountdown(5, phase === 'countdown', handleCountdownDone);
+
+  const startFromSetup = () => {
+    pomodoro.pause();
+    setOpenPanel(null);
+    setPhase('countdown');
+  };
+
+  const backToSetup = () => {
+    pomodoro.pause();
+    setOpenPanel(null);
+    setPhase('setup');
+  };
+
+  const togglePanel = (id: Exclude<PanelId, null>) => {
+    setOpenPanel((prev) => (prev === id ? null : id));
+  };
+
+  // Ferme le panneau ouvert au clic extérieur / Escape
+  useEffect(() => {
+    if (!openPanel) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenPanel(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openPanel]);
+
+  const remainingTodos = todos.todos.filter((t) => !t.done).length;
+  const activeSounds = activeIds.size;
 
   return (
     <div className="app-shell relative min-h-screen overflow-hidden">
-      <CloudDecor />
+      <AnimatePresence>
+        {askName && <NameModal key="name-modal" onSubmit={saveName} />}
+      </AnimatePresence>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-xl flex-col items-center px-4 py-10 sm:py-14">
-        <motion.header
-          className="mb-10 text-center"
-          initial="hidden"
-          animate="show"
-          custom={0}
-          variants={fadeUp}
+      {/* Overlay léger quand un panneau est ouvert */}
+      <AnimatePresence>
+        {openPanel && (
+          <motion.button
+            type="button"
+            aria-label="Fermer le panneau"
+            className="fixed inset-0 z-30 cursor-default bg-[rgba(30,58,95,0.08)]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpenPanel(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="absolute top-4 left-4 z-40 flex flex-col items-start gap-2.5 sm:top-6 sm:left-6">
+        {phase === 'session' && (
+          <button
+            type="button"
+            onClick={backToSetup}
+            className="corner-chip"
+            aria-label="Retour aux réglages"
+            title="Retour aux réglages"
+          >
+            <span className="corner-chip-icon">
+              <Settings className="h-4 w-4" />
+            </span>
+            <span className="corner-chip-label">Réglages</span>
+          </button>
+        )}
+
+        <CornerPanel
+          open={openPanel === 'todo'}
+          onToggle={() => togglePanel('todo')}
+          label="To do"
+          icon={<ListTodo className="h-4 w-4" />}
+          badge={remainingTodos > 0 ? remainingTodos : null}
+          align="left"
         >
-          <p className="mb-3 text-xs font-semibold tracking-[0.28em] text-rose-400/90 uppercase">
-            Focus doux
-          </p>
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-rose-900/90 sm:text-5xl">
-            Nuage Pomodoro
-          </h1>
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-rose-600/75 sm:text-base">
-            Un espace apaisant pour apprendre, respirer et rester concentré.
-          </p>
-        </motion.header>
+          <TodoList
+            todos={todos.todos}
+            onAdd={todos.addTodo}
+            onToggle={todos.toggleTodo}
+            onRemove={todos.removeTodo}
+            onClearDone={todos.clearDone}
+          />
+        </CornerPanel>
+      </div>
 
-        <div className="flex w-full flex-col items-center gap-5">
-          <motion.div
-            className="w-full"
-            initial="hidden"
-            animate="show"
-            custom={1}
-            variants={fadeUp}
-          >
-            <PomodoroTimer
-              config={pomodoro.config}
-              mode={pomodoro.mode}
-              secondsLeft={pomodoro.secondsLeft}
-              isRunning={pomodoro.isRunning}
-              progress={pomodoro.progress}
-              completedFocusSessions={pomodoro.completedFocusSessions}
-              onStart={pomodoro.start}
-              onPause={pomodoro.pause}
-              onReset={pomodoro.reset}
-              onSwitchMode={pomodoro.switchMode}
-              onUpdateConfig={pomodoro.updateConfig}
-            />
-          </motion.div>
+      <div className="absolute top-4 right-4 z-40 sm:top-6 sm:right-6">
+        <CornerPanel
+          open={openPanel === 'sounds'}
+          onToggle={() => togglePanel('sounds')}
+          label="Sons"
+          icon={<Volume2 className="h-4 w-4" />}
+          badge={activeSounds > 0 ? activeSounds : null}
+          align="right"
+        >
+          <NatureSounds
+            activeIds={activeIds}
+            volume={volume}
+            error={error}
+            onVolumeChange={setVolume}
+            onToggle={(id) => void toggleSound(id)}
+          />
+        </CornerPanel>
+      </div>
 
-          <motion.div
-            className="w-full"
-            initial="hidden"
-            animate="show"
-            custom={2}
-            variants={fadeUp}
-          >
-            <QuoteCard quote={quote} quoteKey={quoteKey} onNext={goNext} />
-          </motion.div>
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-16">
+        <AnimatePresence mode="wait">
+          {phase === 'setup' && (
+            <motion.div
+              key="setup"
+              className="w-full"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.4 }}
+            >
+              <SetupScreen
+                config={pomodoro.config}
+                userName={name || 'toi'}
+                onUpdateConfig={pomodoro.updateConfig}
+                onStart={startFromSetup}
+              />
+            </motion.div>
+          )}
 
-          <motion.div
-            className="w-full"
-            initial="hidden"
-            animate="show"
-            custom={3}
-            variants={fadeUp}
-          >
-            <NatureSounds />
-          </motion.div>
-        </div>
+          {phase === 'countdown' && (
+            <motion.div
+              key="countdown"
+              className="flex w-full items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CountdownScreen value={countdownValue} />
+            </motion.div>
+          )}
 
-        <footer className="mt-12 text-center text-xs text-rose-400/55">
-          Cycles configurables · citations · sons de nature
-        </footer>
+          {phase === 'session' && (
+            <motion.div
+              key="session"
+              className="flex w-full flex-col items-center"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <OutlineClock secondsLeft={pomodoro.secondsLeft} />
+
+              <div className="mt-8 w-full flex justify-center sm:mt-9">
+                <QuoteCard quote={quote} quoteKey={quoteKey} onNext={goNext} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
