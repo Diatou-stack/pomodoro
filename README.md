@@ -1,4 +1,4 @@
-# Nuage Pomodoro
+# Pomodoro app
 
 Application web de concentration au style soft / dreamcore.  
 Définis ton rythme, prépare-toi, puis lance une session Pomodoro avec citations, to-do et ambiances sonores.
@@ -37,13 +37,6 @@ Le prénom et les tâches sont mémorisés localement dans le navigateur.
 - [Node.js](https://nodejs.org) 18+  
 - npm (fourni avec Node)
 
-## Installation
-
-```bash
-git clone <url-du-repo>
-cd pomodoro-focus
-npm install
-```
 
 ## Lancer le projet
 
@@ -53,14 +46,6 @@ npm run dev
 
 Ouvre [http://localhost:3000](http://localhost:3000).
 
-### Autres scripts
-
-| Commande | Description |
-|----------|-------------|
-| `npm run build` | Build de production dans `dist/` |
-| `npm run preview` | Prévisualise le build |
-| `npm run lint` | Vérifie TypeScript (`tsc --noEmit`) |
-| `npm run clean` | Supprime le dossier `dist` |
 
 ## Structure
 
@@ -82,7 +67,3 @@ src/
 - Pour revoir la popup du prénom :  
   `localStorage.removeItem('nuage-pomodoro-username')` puis rafraîchis la page.
 
-## Licence
-
-Projet privé — usage personnel.
-"# pomodoro" 
