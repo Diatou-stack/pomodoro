@@ -1,14 +1,14 @@
 # Pomodoro
 
 Application web de concentration au style soft / dreamcore.  
-Définis ton rythme, prépare-toi, puis lance une session Pomodoro avec citations, to-do et ambiances sonores.
+Définis ton rythme, prépare-toi, puis lance une session Pomodoro avec citations et to-do.
 
 ## Aperçu
 
 1. **Bienvenue** — à la première visite, une popup demande ton prénom  
 2. **Réglages** — choisis la durée d’étude et de pause, puis lance  
 3. **Compte à rebours** — 5 secondes pour te préparer  
-4. **Session** — timer minimaliste, citations motivantes, panneaux To-do et Sons
+4. **Session** — timer minimaliste, citations motivantes, panneau To-do
 
 Le prénom et les tâches sont mémorisés localement dans le navigateur.
 
@@ -18,8 +18,7 @@ Le prénom et les tâches sont mémorisés localement dans le navigateur.
 - Accueil personnalisé : « Bienvenue [prénom] »  
 - Citations motivantes en défilement de cartes (rotation auto ou au clic)  
 - Liste de tâches (ajout, cocher, supprimer — persistée en local)  
-- Sons de nature générés en Web Audio : pluie, vagues, vent, forêt  
-- Interface légère : panneaux To-do / Sons en coins, fond bleu doux animé  
+- Interface légère : panneau To-do en coin, fond bleu doux animé  
 
 ## Stack
 
@@ -77,8 +76,8 @@ Le `base` Vite est `/pomodoro/` (nom du dépôt). Sans ça, les JS/CSS ne se cha
 ```
 src/
 ├── components/     # Écrans, timer, cartes, panneaux
-├── data/           # Citations & catalogue de sons
-├── hooks/          # Pomodoro, audio, todos, prénom…
+├── data/           # Citations
+├── hooks/          # Pomodoro, todos, prénom…
 ├── lib/            # Utilitaires
 ├── App.tsx         # Orchestration des phases
 ├── index.css       # Thème & variables CSS
@@ -88,6 +87,6 @@ src/
 ## Astuces
 
 - Clique sur une citation pour passer à la suivante.  
-- Escape ferme le panneau To-do ou Sons ouvert.  
+- Escape ferme le panneau To-do ouvert.  
 - Pour revoir la popup du prénom :  
   `localStorage.removeItem('nuage-pomodoro-username')` puis rafraîchis la page.

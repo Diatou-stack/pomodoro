@@ -120,7 +120,7 @@ body {
 }
 
 .side-card {
-  width: 14.5rem;
+  width: min(14.5rem, calc(100vw - 1.5rem));
   border-radius: 1.35rem;
 }
 
@@ -200,11 +200,6 @@ body {
   left: max(0.5rem, env(safe-area-inset-left));
 }
 
-.safe-corners-right {
-  top: max(0.5rem, env(safe-area-inset-top));
-  right: max(0.5rem, env(safe-area-inset-right));
-}
-
 @media (orientation: landscape) and (max-height: 560px) {
   .app-shell {
     overflow-x: hidden;
@@ -263,35 +258,6 @@ body {
   transform: translate(-50%, -50%);
   box-shadow: 0 2px 8px rgba(30, 58, 95, 0.25);
   transition: left 0.35s ease-out;
-}
-
-.volume-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(30, 58, 95, 0.16);
-  outline: none;
-}
-
-.volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: var(--color-ink);
-  border: 2px solid #fff;
-  cursor: pointer;
-}
-
-.volume-slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: var(--color-ink);
-  border: 2px solid #fff;
-  cursor: pointer;
 }
 
 .timer-digits {

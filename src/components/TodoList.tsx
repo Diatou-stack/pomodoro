@@ -44,7 +44,7 @@ export function TodoList({
   const progress = todos.length === 0 ? 0 : doneCount / todos.length;
 
   return (
-    <aside className="glass-panel flex max-h-[20rem] flex-col rounded-[1.35rem] p-3.5 shadow-lg">
+    <aside className="glass-panel flex w-full max-h-[min(20rem,70dvh)] flex-col rounded-[1.35rem] p-3.5 shadow-lg">
       <form onSubmit={handleSubmit} className="mb-2.5 flex gap-1.5">
         <input
           value={draft}

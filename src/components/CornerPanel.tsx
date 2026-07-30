@@ -64,11 +64,11 @@ export function CornerPanel({
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              'absolute top-[calc(100%+0.5rem)] z-50 w-[16.5rem]',
+              'absolute top-[calc(100%+0.5rem)] z-50 w-[min(16.5rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)]',
               align === 'right' ? 'right-0' : 'left-0',
             )}
           >
-            {children}
+            <div className="w-full min-w-0">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>

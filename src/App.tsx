@@ -1,15 +1,13 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ListTodo, LogOut, Volume2 } from 'lucide-react';
+import { ListTodo, LogOut } from 'lucide-react';
 import { CornerPanel } from './components/CornerPanel';
 import { CountdownScreen } from './components/CountdownScreen';
 import { NameModal } from './components/NameModal';
-import { NatureSounds } from './components/NatureSounds';
 import { OutlineClock } from './components/OutlineClock';
 import { QuoteCard } from './components/QuoteCard';
 import { SetupScreen } from './components/SetupScreen';
 import { TodoList } from './components/TodoList';
-import { useNatureAudio } from './hooks/useNatureAudio';
 import { usePomodoro } from './hooks/usePomodoro';
 import { usePreCountdown } from './hooks/usePreCountdown';
 import { useQuoteRotation } from './hooks/useQuoteRotation';
@@ -17,16 +15,14 @@ import { useTodos } from './hooks/useTodos';
 import { useUserName } from './hooks/useUserName';
 
 type Phase = 'setup' | 'countdown' | 'session';
-type PanelId = 'todo' | 'sounds' | null;
 
 export default function App() {
   const [phase, setPhase] = useState<Phase>('setup');
-  const [openPanel, setOpenPanel] = useState<PanelId>(null);
+  const [todoOpen, setTodoOpen] = useState(false);
   const pomodoro = usePomodoro({ focusMinutes: 25, breakMinutes: 5 });
   const { quote, quoteKey, goNext } = useQuoteRotation(10_000);
   const todos = useTodos();
   const { name, askName, saveName } = useUserName();
-  const { activeIds, volume, setVolume, toggleSound, error } = useNatureAudio();
 
   const handleCountdownDone = useCallback(() => {
     pomodoro.beginSession();
@@ -37,39 +33,34 @@ export default function App() {
 
   const startFromSetup = () => {
     pomodoro.pause();
-    setOpenPanel(null);
+    setTodoOpen(false);
     setPhase('countdown');
   };
 
   const backToSetup = () => {
     pomodoro.pause();
-    setOpenPanel(null);
+    setTodoOpen(false);
     setPhase('setup');
   };
 
-  const togglePanel = (id: Exclude<PanelId, null>) => {
-    setOpenPanel((prev) => (prev === id ? null : id));
-  };
-
-  // Ferme le panneau ouvert au clic extérieur / Escape ; ferme aussi hors session
+  // Ferme le panneau to-do hors session
   useEffect(() => {
-    if (phase !== 'session' && openPanel) {
-      setOpenPanel(null);
+    if (phase !== 'session' && todoOpen) {
+      setTodoOpen(false);
     }
-  }, [phase, openPanel]);
+  }, [phase, todoOpen]);
 
   useEffect(() => {
-    if (!openPanel) return;
+    if (!todoOpen) return;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpenPanel(null);
+      if (e.key === 'Escape') setTodoOpen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [openPanel]);
+  }, [todoOpen]);
 
   const remainingTodos = todos.todos.filter((t) => !t.done).length;
-  const activeSounds = activeIds.size;
 
   const shellMode =
     phase === 'session' ? (pomodoro.mode === 'break' ? 'break' : 'focus') : 'idle';
@@ -83,9 +74,8 @@ export default function App() {
         {askName && <NameModal key="name-modal" onSubmit={saveName} />}
       </AnimatePresence>
 
-      {/* Overlay léger quand un panneau est ouvert */}
       <AnimatePresence>
-        {openPanel && (
+        {todoOpen && (
           <motion.button
             type="button"
             aria-label="Fermer le panneau"
@@ -93,67 +83,46 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setOpenPanel(null)}
+            onClick={() => setTodoOpen(false)}
           />
         )}
       </AnimatePresence>
 
       {phase === 'session' && (
-        <>
-          <div className="safe-corners absolute top-3 left-3 z-40 flex flex-row items-center gap-2 sm:top-6 sm:left-6 sm:flex-col sm:items-start sm:gap-2.5 short-land:top-2 short-land:left-2 short-land:!flex-row">
-            <button
-              type="button"
-              onClick={backToSetup}
-              className="corner-chip"
-              aria-label="Fin de session"
-              title="Fin de session — retour au setup"
-            >
-              <span className="corner-chip-icon">
-                <LogOut className="h-4 w-4" />
-              </span>
-              <span className="corner-chip-label">Fin de session</span>
-            </button>
+        <div className="safe-corners absolute top-3 left-3 z-40 flex max-w-[calc(100vw-1.5rem)] flex-col items-start gap-2 sm:top-6 sm:left-6 sm:gap-2.5 short-land:top-2 short-land:left-2">
+          <button
+            type="button"
+            onClick={backToSetup}
+            className="corner-chip"
+            aria-label="Fin de session"
+            title="Fin de session — retour au setup"
+          >
+            <span className="corner-chip-icon">
+              <LogOut className="h-4 w-4" />
+            </span>
+            <span className="corner-chip-label">Fin de session</span>
+          </button>
 
-            <CornerPanel
-              open={openPanel === 'todo'}
-              onToggle={() => togglePanel('todo')}
-              label="To do"
-              icon={<ListTodo className="h-4 w-4" />}
-              badge={remainingTodos > 0 ? remainingTodos : null}
-              align="left"
-            >
-              <TodoList
-                todos={todos.todos}
-                onAdd={todos.addTodo}
-                onToggle={todos.toggleTodo}
-                onRemove={todos.removeTodo}
-                onClearDone={todos.clearDone}
-              />
-            </CornerPanel>
-          </div>
-
-          <div className="safe-corners-right absolute top-3 right-3 z-40 sm:top-6 sm:right-6 short-land:top-2 short-land:right-2">
-            <CornerPanel
-              open={openPanel === 'sounds'}
-              onToggle={() => togglePanel('sounds')}
-              label="Sons"
-              icon={<Volume2 className="h-4 w-4" />}
-              badge={activeSounds > 0 ? activeSounds : null}
-              align="right"
-            >
-              <NatureSounds
-                activeIds={activeIds}
-                volume={volume}
-                error={error}
-                onVolumeChange={setVolume}
-                onToggle={(id) => void toggleSound(id)}
-              />
-            </CornerPanel>
-          </div>
-        </>
+          <CornerPanel
+            open={todoOpen}
+            onToggle={() => setTodoOpen((o) => !o)}
+            label="To do"
+            icon={<ListTodo className="h-4 w-4" />}
+            badge={remainingTodos > 0 ? remainingTodos : null}
+            align="left"
+          >
+            <TodoList
+              todos={todos.todos}
+              onAdd={todos.addTodo}
+              onToggle={todos.toggleTodo}
+              onRemove={todos.removeTodo}
+              onClearDone={todos.clearDone}
+            />
+          </CornerPanel>
+        </div>
       )}
 
-      <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center px-4 py-12 short-land:min-h-0 short-land:h-full short-land:max-w-none short-land:px-[max(4.5rem,env(safe-area-inset-left))] short-land:pr-[max(4.5rem,env(safe-area-inset-right))] short-land:py-2 sm:py-16">
+      <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center px-4 py-12 short-land:min-h-0 short-land:h-full short-land:max-w-none short-land:px-[max(4.5rem,env(safe-area-inset-left))] short-land:pr-[max(1rem,env(safe-area-inset-right))] short-land:py-2 sm:py-16">
         <AnimatePresence mode="wait">
           {phase === 'setup' && (
             <motion.div
