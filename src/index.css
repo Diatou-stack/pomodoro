@@ -1,6 +1,9 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+/* Téléphone / tablette basse en paysage — max-height assez haut pour iPhone & Android */
+@custom-variant short-land (@media (orientation: landscape) and (max-height: 560px));
+
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
@@ -16,17 +19,30 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+  max-width: 100%;
+}
+
 body {
   @apply font-sans antialiased;
   color: var(--color-ink);
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   overflow-x: hidden;
   background: #e4f0fb;
 }
 
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100%;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .session-controls {
+    opacity: 1 !important;
+  }
 }
 
 .app-shell {
@@ -176,6 +192,56 @@ body {
 @media (min-width: 640px) {
   .outline-clock {
     -webkit-text-stroke: 3.75px var(--color-ink);
+  }
+}
+
+.safe-corners {
+  top: max(0.5rem, env(safe-area-inset-top));
+  left: max(0.5rem, env(safe-area-inset-left));
+}
+
+.safe-corners-right {
+  top: max(0.5rem, env(safe-area-inset-top));
+  right: max(0.5rem, env(safe-area-inset-right));
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .app-shell {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .corner-chip {
+    padding: 0.4rem 0.5rem;
+    gap: 0.3rem;
+  }
+
+  .corner-chip-icon {
+    height: 1.55rem;
+    width: 1.55rem;
+    border-radius: 0.5rem;
+  }
+
+  .corner-chip-label {
+    display: none;
+  }
+
+  .outline-clock {
+    -webkit-text-stroke: 2.1px var(--color-ink);
+  }
+
+  .timer-digits {
+    -webkit-text-stroke: 2px var(--color-ink);
+  }
+
+  .side-card {
+    max-height: min(68dvh, 16rem);
+    overflow-y: auto;
+  }
+
+  .panel-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
   }
 }
 

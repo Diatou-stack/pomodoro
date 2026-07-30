@@ -22,9 +22,9 @@ export function OutlineClock({
   const phaseLabel = mode === 'focus' ? 'Étude' : 'Pause';
 
   return (
-    <section className="group flex w-full flex-col items-center">
+    <section className="group flex w-full flex-col items-center short-land:w-auto short-land:shrink-0">
       <p
-        className="mb-3 text-xs font-semibold tracking-[0.22em] uppercase text-[var(--color-muted)] sm:mb-4 sm:text-sm"
+        className="mb-2 text-xs font-semibold tracking-[0.22em] uppercase text-[var(--color-muted)] sm:mb-4 sm:text-sm short-land:mb-1 short-land:text-[0.65rem]"
         aria-live="polite"
       >
         {phaseLabel}
@@ -33,7 +33,7 @@ export function OutlineClock({
       <button
         type="button"
         onClick={onTogglePause}
-        className="outline-clock cursor-pointer text-[8rem] leading-[0.85] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:opacity-90 sm:text-[11rem] md:text-[14rem] lg:text-[16rem]"
+        className="outline-clock cursor-pointer text-[clamp(3.25rem,min(22vw,28vh),16rem)] leading-[0.85] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:opacity-90"
         aria-live="polite"
         aria-label={isRunning ? 'Mettre en pause' : 'Reprendre'}
         title={isRunning ? 'Cliquer pour pause' : 'Cliquer pour reprendre'}
@@ -42,7 +42,7 @@ export function OutlineClock({
       </button>
 
       <div
-        className="mt-5 flex items-center gap-2 opacity-100 transition-opacity duration-300 sm:mt-6 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+        className="session-controls mt-4 flex items-center gap-2 opacity-100 transition-opacity duration-300 sm:mt-6 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 short-land:mt-2 short-land:!opacity-100"
         role="group"
         aria-label="Contrôles du timer"
       >
@@ -84,7 +84,7 @@ function ControlButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--glass-border)] bg-[rgba(255,255,255,0.45)] text-[var(--color-ink-soft)] shadow-[var(--glass-shadow)] backdrop-blur-md transition hover:bg-[rgba(255,255,255,0.7)] active:scale-95"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--glass-border)] bg-[rgba(255,255,255,0.45)] text-[var(--color-ink-soft)] shadow-[var(--glass-shadow)] backdrop-blur-md transition hover:bg-[rgba(255,255,255,0.7)] active:scale-95 short-land:h-8 short-land:w-8"
     >
       {children}
     </button>

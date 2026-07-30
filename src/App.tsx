@@ -76,7 +76,7 @@ export default function App() {
 
   return (
     <div
-      className="app-shell relative min-h-screen overflow-hidden"
+      className="app-shell relative min-h-dvh overflow-x-hidden overflow-y-auto short-land:h-dvh short-land:max-h-dvh short-land:overflow-y-auto"
       data-mode={shellMode}
     >
       <AnimatePresence>
@@ -100,7 +100,7 @@ export default function App() {
 
       {phase === 'session' && (
         <>
-          <div className="absolute top-4 left-4 z-40 flex flex-col items-start gap-2.5 sm:top-6 sm:left-6">
+          <div className="safe-corners absolute top-3 left-3 z-40 flex flex-row items-center gap-2 sm:top-6 sm:left-6 sm:flex-col sm:items-start sm:gap-2.5 short-land:top-2 short-land:left-2 short-land:!flex-row">
             <button
               type="button"
               onClick={backToSetup}
@@ -132,7 +132,7 @@ export default function App() {
             </CornerPanel>
           </div>
 
-          <div className="absolute top-4 right-4 z-40 sm:top-6 sm:right-6">
+          <div className="safe-corners-right absolute top-3 right-3 z-40 sm:top-6 sm:right-6 short-land:top-2 short-land:right-2">
             <CornerPanel
               open={openPanel === 'sounds'}
               onToggle={() => togglePanel('sounds')}
@@ -153,7 +153,7 @@ export default function App() {
         </>
       )}
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-16">
+      <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center px-4 py-12 short-land:min-h-0 short-land:h-full short-land:max-w-none short-land:px-[max(4.5rem,env(safe-area-inset-left))] short-land:pr-[max(4.5rem,env(safe-area-inset-right))] short-land:py-2 sm:py-16">
         <AnimatePresence mode="wait">
           {phase === 'setup' && (
             <motion.div
@@ -189,7 +189,7 @@ export default function App() {
           {phase === 'session' && (
             <motion.div
               key="session"
-              className="flex w-full flex-col items-center"
+              className="flex w-full flex-col items-center short-land:flex-row short-land:items-center short-land:justify-center short-land:gap-6"
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
@@ -206,7 +206,7 @@ export default function App() {
                 onSkip={pomodoro.skip}
               />
 
-              <div className="mt-6 w-full flex justify-center sm:mt-8">
+              <div className="mt-6 flex w-full justify-center sm:mt-8 short-land:mt-0 short-land:max-w-xs short-land:shrink short-land:min-w-0">
                 <QuoteCard quote={quote} quoteKey={quoteKey} onNext={goNext} />
               </div>
             </motion.div>
