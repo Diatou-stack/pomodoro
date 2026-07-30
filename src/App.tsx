@@ -22,7 +22,7 @@ export default function App() {
   const pomodoro = usePomodoro({ focusMinutes: 25, breakMinutes: 5 });
   const { quote, quoteKey, goNext } = useQuoteRotation(10_000);
   const todos = useTodos();
-  const { name, askName, saveName } = useUserName();
+  const { askName, saveName } = useUserName();
 
   const handleCountdownDone = useCallback(() => {
     pomodoro.beginSession();
@@ -136,12 +136,11 @@ export default function App() {
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <SetupScreen
-                    config={pomodoro.config}
-                    userName={name || 'toi'}
-                    onUpdateConfig={pomodoro.updateConfig}
-                    onStart={startFromSetup}
-                  />
+              <SetupScreen
+                config={pomodoro.config}
+                onUpdateConfig={pomodoro.updateConfig}
+                onStart={startFromSetup}
+              />
                 </motion.div>
               )}
 

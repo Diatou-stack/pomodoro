@@ -15,7 +15,7 @@ Le prénom et les tâches sont mémorisés localement dans le navigateur.
 ## Fonctionnalités
 
 - Chronomètre Pomodoro (étude / pause) avec presets et durées personnalisées  
-- Accueil personnalisé : « Bienvenue [prénom] »  
+- Accueil avec demande de prénom à la première visite  
 - Citations motivantes en défilement de cartes (rotation auto ou au clic)  
 - Liste de tâches (ajout, cocher, supprimer — persistée en local)  
 - Interface légère : panneau To-do en coin, fond bleu doux animé  

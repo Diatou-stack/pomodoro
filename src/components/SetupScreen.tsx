@@ -4,7 +4,6 @@ import type { PomodoroConfig } from '../hooks/usePomodoro';
 
 interface SetupScreenProps {
   config: PomodoroConfig;
-  userName: string;
   onUpdateConfig: (partial: Partial<PomodoroConfig>) => void;
   onStart: () => void;
 }
@@ -101,7 +100,6 @@ function DurationControl({
 
 export function SetupScreen({
   config,
-  userName,
   onUpdateConfig,
   onStart,
 }: SetupScreenProps) {
@@ -109,7 +107,7 @@ export function SetupScreen({
     <section className="mx-auto w-full max-w-md text-center short-land:flex short-land:max-w-3xl short-land:items-center short-land:gap-6 short-land:text-left">
       <header className="short-land:w-[11.5rem] short-land:shrink-0">
         <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-[var(--color-ink)] sm:text-5xl short-land:mb-1 short-land:!text-2xl">
-          Bienvenue {userName}
+          Prêt à te concentrer ?
         </h1>
         <p className="mb-10 text-base text-[var(--color-ink-soft)] short-land:mb-0 short-land:!text-sm">
           Définis ton rythme, puis lance.
