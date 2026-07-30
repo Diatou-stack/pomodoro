@@ -20,8 +20,8 @@ export function NameModal({ onSubmit }: NameModalProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {/* Fond opaque en paysage pour éviter le chevauchement illisible */}
-      <div className="absolute inset-0 bg-[rgba(228,240,251,0.72)] backdrop-blur-md short-land:bg-[rgba(228,240,251,0.88)]" />
+      {/* Fond plein pour ne rien laisser apparaître derrière */}
+      <div className="absolute inset-0 bg-[#e4f0fb]" />
 
       <motion.div
         role="dialog"

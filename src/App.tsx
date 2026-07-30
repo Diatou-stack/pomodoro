@@ -74,114 +74,119 @@ export default function App() {
         {askName && <NameModal key="name-modal" onSubmit={saveName} />}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {todoOpen && (
-          <motion.button
-            type="button"
-            aria-label="Fermer le panneau"
-            className="fixed inset-0 z-30 cursor-default bg-[rgba(30,58,95,0.08)]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setTodoOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {phase === 'session' && (
-        <div className="safe-corners absolute top-3 left-3 z-40 flex max-w-[calc(100vw-1.5rem)] flex-col items-start gap-2 sm:top-6 sm:left-6 sm:gap-2.5 short-land:top-2 short-land:left-2">
-          <button
-            type="button"
-            onClick={backToSetup}
-            className="corner-chip"
-            aria-label="Fin de session"
-            title="Fin de session — retour au setup"
-          >
-            <span className="corner-chip-icon">
-              <LogOut className="h-4 w-4" />
-            </span>
-            <span className="corner-chip-label">Fin de session</span>
-          </button>
-
-          <CornerPanel
-            open={todoOpen}
-            onToggle={() => setTodoOpen((o) => !o)}
-            label="To do"
-            icon={<ListTodo className="h-4 w-4" />}
-            badge={remainingTodos > 0 ? remainingTodos : null}
-            align="left"
-          >
-            <TodoList
-              todos={todos.todos}
-              onAdd={todos.addTodo}
-              onToggle={todos.toggleTodo}
-              onRemove={todos.removeTodo}
-              onClearDone={todos.clearDone}
-            />
-          </CornerPanel>
-        </div>
-      )}
-
-      <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center px-4 py-12 short-land:min-h-0 short-land:h-full short-land:max-w-none short-land:px-[max(4.5rem,env(safe-area-inset-left))] short-land:pr-[max(1rem,env(safe-area-inset-right))] short-land:py-2 sm:py-16">
-        <AnimatePresence mode="wait">
-          {phase === 'setup' && (
-            <motion.div
-              key="setup"
-              className="w-full"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.4 }}
-            >
-              <SetupScreen
-                config={pomodoro.config}
-                userName={name || 'toi'}
-                onUpdateConfig={pomodoro.updateConfig}
-                onStart={startFromSetup}
+      {/* L’app ne s’affiche qu’après le prénom — évite « Bienvenue … » derrière la popup */}
+      {!askName && (
+        <>
+          <AnimatePresence>
+            {todoOpen && (
+              <motion.button
+                type="button"
+                aria-label="Fermer le panneau"
+                className="fixed inset-0 z-30 cursor-default bg-[rgba(30,58,95,0.08)]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setTodoOpen(false)}
               />
-            </motion.div>
-          )}
-
-          {phase === 'countdown' && (
-            <motion.div
-              key="countdown"
-              className="flex w-full items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CountdownScreen value={countdownValue} />
-            </motion.div>
-          )}
+            )}
+          </AnimatePresence>
 
           {phase === 'session' && (
-            <motion.div
-              key="session"
-              className="flex w-full flex-col items-center short-land:flex-row short-land:items-center short-land:justify-center short-land:gap-6"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <OutlineClock
-                secondsLeft={pomodoro.secondsLeft}
-                mode={pomodoro.mode}
-                isRunning={pomodoro.isRunning}
-                onTogglePause={() =>
-                  pomodoro.isRunning ? pomodoro.pause() : pomodoro.start()
-                }
-                onReset={pomodoro.reset}
-                onSkip={pomodoro.skip}
-              />
+            <div className="safe-corners absolute top-3 left-3 z-40 flex max-w-[calc(100vw-1.5rem)] flex-col items-start gap-2 sm:top-6 sm:left-6 sm:gap-2.5 short-land:top-2 short-land:left-2">
+              <button
+                type="button"
+                onClick={backToSetup}
+                className="corner-chip"
+                aria-label="Fin de session"
+                title="Fin de session — retour au setup"
+              >
+                <span className="corner-chip-icon">
+                  <LogOut className="h-4 w-4" />
+                </span>
+                <span className="corner-chip-label">Fin de session</span>
+              </button>
 
-              <div className="mt-6 flex w-full justify-center sm:mt-8 short-land:mt-0 short-land:max-w-xs short-land:shrink short-land:min-w-0">
-                <QuoteCard quote={quote} quoteKey={quoteKey} onNext={goNext} />
-              </div>
-            </motion.div>
+              <CornerPanel
+                open={todoOpen}
+                onToggle={() => setTodoOpen((o) => !o)}
+                label="To do"
+                icon={<ListTodo className="h-4 w-4" />}
+                badge={remainingTodos > 0 ? remainingTodos : null}
+                align="left"
+              >
+                <TodoList
+                  todos={todos.todos}
+                  onAdd={todos.addTodo}
+                  onToggle={todos.toggleTodo}
+                  onRemove={todos.removeTodo}
+                  onClearDone={todos.clearDone}
+                />
+              </CornerPanel>
+            </div>
           )}
-        </AnimatePresence>
-      </main>
+
+          <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center px-4 py-12 short-land:min-h-0 short-land:h-full short-land:max-w-none short-land:px-[max(4.5rem,env(safe-area-inset-left))] short-land:pr-[max(1rem,env(safe-area-inset-right))] short-land:py-2 sm:py-16">
+            <AnimatePresence mode="wait">
+              {phase === 'setup' && (
+                <motion.div
+                  key="setup"
+                  className="w-full"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <SetupScreen
+                    config={pomodoro.config}
+                    userName={name || 'toi'}
+                    onUpdateConfig={pomodoro.updateConfig}
+                    onStart={startFromSetup}
+                  />
+                </motion.div>
+              )}
+
+              {phase === 'countdown' && (
+                <motion.div
+                  key="countdown"
+                  className="flex w-full items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CountdownScreen value={countdownValue} />
+                </motion.div>
+              )}
+
+              {phase === 'session' && (
+                <motion.div
+                  key="session"
+                  className="flex w-full flex-col items-center short-land:flex-row short-land:items-center short-land:justify-center short-land:gap-6"
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <OutlineClock
+                    secondsLeft={pomodoro.secondsLeft}
+                    mode={pomodoro.mode}
+                    isRunning={pomodoro.isRunning}
+                    onTogglePause={() =>
+                      pomodoro.isRunning ? pomodoro.pause() : pomodoro.start()
+                    }
+                    onReset={pomodoro.reset}
+                    onSkip={pomodoro.skip}
+                  />
+
+                  <div className="mt-6 flex w-full justify-center sm:mt-8 short-land:mt-0 short-land:max-w-xs short-land:shrink short-land:min-w-0">
+                    <QuoteCard quote={quote} quoteKey={quoteKey} onNext={goNext} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+        </>
+      )}
     </div>
   );
 }
