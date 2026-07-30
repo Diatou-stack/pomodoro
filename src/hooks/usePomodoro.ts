@@ -100,6 +100,20 @@ export function usePomodoro(initialConfig: PomodoroConfig = DEFAULT_CONFIG) {
     resetToMode(mode, false);
   }, [mode, resetToMode]);
 
+  /** Passe immédiatement à la phase suivante (étude ↔ pause). */
+  const skip = useCallback(() => {
+    clearTimer();
+    if (mode === 'focus') {
+      setCompletedFocusSessions((n) => n + 1);
+      setMode('break');
+      setSecondsLeft(durationForMode('break'));
+    } else {
+      setMode('focus');
+      setSecondsLeft(durationForMode('focus'));
+    }
+    setIsRunning(true);
+  }, [clearTimer, durationForMode, mode]);
+
   const switchMode = useCallback(
     (nextMode: TimerMode) => {
       resetToMode(nextMode, false);
@@ -139,6 +153,7 @@ export function usePomodoro(initialConfig: PomodoroConfig = DEFAULT_CONFIG) {
     pause,
     beginSession,
     reset,
+    skip,
     switchMode,
     updateConfig,
   };

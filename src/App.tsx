@@ -1,6 +1,6 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ListTodo, Settings, Volume2 } from 'lucide-react';
+import { ListTodo, LogOut, Volume2 } from 'lucide-react';
 import { CornerPanel } from './components/CornerPanel';
 import { CountdownScreen } from './components/CountdownScreen';
 import { NameModal } from './components/NameModal';
@@ -51,7 +51,13 @@ export default function App() {
     setOpenPanel((prev) => (prev === id ? null : id));
   };
 
-  // Ferme le panneau ouvert au clic extérieur / Escape
+  // Ferme le panneau ouvert au clic extérieur / Escape ; ferme aussi hors session
+  useEffect(() => {
+    if (phase !== 'session' && openPanel) {
+      setOpenPanel(null);
+    }
+  }, [phase, openPanel]);
+
   useEffect(() => {
     if (!openPanel) return;
 
@@ -65,8 +71,14 @@ export default function App() {
   const remainingTodos = todos.todos.filter((t) => !t.done).length;
   const activeSounds = activeIds.size;
 
+  const shellMode =
+    phase === 'session' ? (pomodoro.mode === 'break' ? 'break' : 'focus') : 'idle';
+
   return (
-    <div className="app-shell relative min-h-screen overflow-hidden">
+    <div
+      className="app-shell relative min-h-screen overflow-hidden"
+      data-mode={shellMode}
+    >
       <AnimatePresence>
         {askName && <NameModal key="name-modal" onSubmit={saveName} />}
       </AnimatePresence>
@@ -86,58 +98,60 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <div className="absolute top-4 left-4 z-40 flex flex-col items-start gap-2.5 sm:top-6 sm:left-6">
-        {phase === 'session' && (
-          <button
-            type="button"
-            onClick={backToSetup}
-            className="corner-chip"
-            aria-label="Retour aux réglages"
-            title="Retour aux réglages"
-          >
-            <span className="corner-chip-icon">
-              <Settings className="h-4 w-4" />
-            </span>
-            <span className="corner-chip-label">Réglages</span>
-          </button>
-        )}
+      {phase === 'session' && (
+        <>
+          <div className="absolute top-4 left-4 z-40 flex flex-col items-start gap-2.5 sm:top-6 sm:left-6">
+            <button
+              type="button"
+              onClick={backToSetup}
+              className="corner-chip"
+              aria-label="Fin de session"
+              title="Fin de session — retour au setup"
+            >
+              <span className="corner-chip-icon">
+                <LogOut className="h-4 w-4" />
+              </span>
+              <span className="corner-chip-label">Fin de session</span>
+            </button>
 
-        <CornerPanel
-          open={openPanel === 'todo'}
-          onToggle={() => togglePanel('todo')}
-          label="To do"
-          icon={<ListTodo className="h-4 w-4" />}
-          badge={remainingTodos > 0 ? remainingTodos : null}
-          align="left"
-        >
-          <TodoList
-            todos={todos.todos}
-            onAdd={todos.addTodo}
-            onToggle={todos.toggleTodo}
-            onRemove={todos.removeTodo}
-            onClearDone={todos.clearDone}
-          />
-        </CornerPanel>
-      </div>
+            <CornerPanel
+              open={openPanel === 'todo'}
+              onToggle={() => togglePanel('todo')}
+              label="To do"
+              icon={<ListTodo className="h-4 w-4" />}
+              badge={remainingTodos > 0 ? remainingTodos : null}
+              align="left"
+            >
+              <TodoList
+                todos={todos.todos}
+                onAdd={todos.addTodo}
+                onToggle={todos.toggleTodo}
+                onRemove={todos.removeTodo}
+                onClearDone={todos.clearDone}
+              />
+            </CornerPanel>
+          </div>
 
-      <div className="absolute top-4 right-4 z-40 sm:top-6 sm:right-6">
-        <CornerPanel
-          open={openPanel === 'sounds'}
-          onToggle={() => togglePanel('sounds')}
-          label="Sons"
-          icon={<Volume2 className="h-4 w-4" />}
-          badge={activeSounds > 0 ? activeSounds : null}
-          align="right"
-        >
-          <NatureSounds
-            activeIds={activeIds}
-            volume={volume}
-            error={error}
-            onVolumeChange={setVolume}
-            onToggle={(id) => void toggleSound(id)}
-          />
-        </CornerPanel>
-      </div>
+          <div className="absolute top-4 right-4 z-40 sm:top-6 sm:right-6">
+            <CornerPanel
+              open={openPanel === 'sounds'}
+              onToggle={() => togglePanel('sounds')}
+              label="Sons"
+              icon={<Volume2 className="h-4 w-4" />}
+              badge={activeSounds > 0 ? activeSounds : null}
+              align="right"
+            >
+              <NatureSounds
+                activeIds={activeIds}
+                volume={volume}
+                error={error}
+                onVolumeChange={setVolume}
+                onToggle={(id) => void toggleSound(id)}
+              />
+            </CornerPanel>
+          </div>
+        </>
+      )}
 
       <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-16">
         <AnimatePresence mode="wait">
@@ -181,9 +195,18 @@ export default function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
-              <OutlineClock secondsLeft={pomodoro.secondsLeft} />
+              <OutlineClock
+                secondsLeft={pomodoro.secondsLeft}
+                mode={pomodoro.mode}
+                isRunning={pomodoro.isRunning}
+                onTogglePause={() =>
+                  pomodoro.isRunning ? pomodoro.pause() : pomodoro.start()
+                }
+                onReset={pomodoro.reset}
+                onSkip={pomodoro.skip}
+              />
 
-              <div className="mt-8 w-full flex justify-center sm:mt-9">
+              <div className="mt-6 w-full flex justify-center sm:mt-8">
                 <QuoteCard quote={quote} quoteKey={quoteKey} onNext={goNext} />
               </div>
             </motion.div>
